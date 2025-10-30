@@ -16,6 +16,58 @@
         --glass-border: rgba(255, 255, 255, 0.06);
       }
 
+      /* Improved result table styling */
+      .table-wrap {
+        margin-top: 12px;
+        overflow-x: auto;
+        border-radius: 8px;
+        -webkit-overflow-scrolling: touch;
+      }
+      #result table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.01),
+          transparent
+        );
+        color: var(--text);
+      }
+      #result thead th {
+        text-align: left;
+        padding: 12px 16px;
+        font-weight: 700;
+        color: var(--muted);
+        background: rgba(255, 255, 255, 0.02);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      }
+      #result tbody td {
+        padding: 12px 16px;
+        vertical-align: middle;
+        border-bottom: 1px dashed rgba(255, 255, 255, 0.03);
+      }
+      #result tbody tr:nth-child(odd) td {
+        background: rgba(255, 255, 255, 0.01);
+      }
+      #result tbody tr:hover td {
+        background: rgba(124, 92, 255, 0.04);
+      }
+      #result td:first-child {
+        width: 56px;
+        text-align: center;
+        color: var(--muted);
+      }
+      #result td:nth-child(2) {
+        font-weight: 600;
+      }
+      @media (max-width: 420px) {
+        #result thead th,
+        #result tbody td {
+          padding: 10px 12px;
+          font-size: 0.95rem;
+        }
+      }
       html,
       body {
         height: 100%;
@@ -222,34 +274,110 @@
     </div>
 
     <footer class="site-footer" aria-label="Footer">
-      <footer
-      class="w-full text-center py-6 bg-[#23232a] text-yellow-400 font-semibold border-t-2 border-yellow-400"
-    >
-      <div style="margin-bottom: 12px;">
-        <a href="https://instagram.com/ilhamm.18" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:#7f5af0;font-weight:600;" class="ig-link">
-          <img src="public/igeh.png" alt="Instagram" style="height:28px;width:28px;vertical-align:middle;filter:drop-shadow(0 2px 8px rgba(127,90,240,0.18));">
-          <span class="ig-link-text">Follow me on Instagram</span>
-        </a>
+      <div
+        class="w-full text-center py-6"
+        style="
+          background: #23232a;
+          color: #ffd166;
+          font-weight: 600;
+          border-top: 2px solid #ffd166;
+        "
+      >
+        <div style="margin-bottom: 12px">
+          <a
+            href="https://instagram.com/ilhamm.18"
+            target="_blank"
+            rel="noopener noreferrer"
+            style="
+              display: inline-flex;
+              align-items: center;
+              gap: 8px;
+              text-decoration: none;
+              color: #7f5af0;
+              font-weight: 600;
+            "
+            class="ig-link"
+          >
+            <img
+              src="public/igeh.png"
+              alt="Instagram"
+              style="
+                height: 28px;
+                width: 28px;
+                vertical-align: middle;
+                filter: drop-shadow(0 2px 8px rgba(127, 90, 240, 0.18));
+              "
+            />
+            <span class="ig-link-text">Follow me on Instagram</span>
+          </a>
+        </div>
+        &copy; <span id="footer-year">2025</span> by ilham — All rights
+        reserved.
       </div>
-      &copy; 2025 by ilham All rights reserved.
-      <script>
-        document.addEventListener("DOMContentLoaded", function () {
-          var aboutSection = document.getElementById("about");
-          if (aboutSection) {
-            setTimeout(function () {
-              aboutSection.scrollIntoView({ behavior: "smooth" });
-            }, 400);
-          }
-        });
     </footer>
 
     <script>
+      // Read HTML file and return parsed Document
       async function readHTMLFile(file) {
         const text = await file.text();
         const parser = new DOMParser();
         return parser.parseFromString(text, "text/html");
       }
 
+      // Try to extract likely usernames from a parsed HTML Document.
+      // This function uses several heuristics and falls back to anchors/h2/li text.
+      function extractUsernames(doc) {
+        const names = new Set();
+
+        const push = (s) => {
+          if (!s) return;
+          s = s.replace(/^@/, "").trim();
+          // basic validation: usernames are usually 1-30 chars, letters, numbers, dot, underscore
+          const cleaned = s.split("\n")[0].trim();
+          if (/^[A-Za-z0-9._]{1,30}$/.test(cleaned)) names.add(cleaned);
+        };
+
+        // 1) common Instagram export: h2 may contain username
+        doc.querySelectorAll("h2").forEach((el) => push(el.textContent));
+
+        // 2) Anchors that look like profile links (instagram.com/username or /username/)
+        doc.querySelectorAll("a[href]").forEach((a) => {
+          try {
+            const href = a.getAttribute("href");
+            // absolute links
+            const m1 =
+              href &&
+              href.match(
+                /instagram\.com\/(?:p\/|explore\/|account_linking\/)?@?([A-Za-z0-9._]+)/i
+              );
+            if (m1 && m1[1]) return push(m1[1]);
+            // path-only like /username/
+            const m2 = href && href.match(/^\/?([A-Za-z0-9._]{1,30})\/?$/);
+            if (m2 && m2[1]) return push(m2[1]);
+          } catch (e) {
+            // ignore
+          }
+          // fallback: anchor text that looks like a username
+          const txt = a.textContent && a.textContent.trim();
+          if (txt && /^[A-Za-z0-9._]{1,30}$/.test(txt)) push(txt);
+        });
+
+        // 3) list items or spans that may contain usernames
+        doc.querySelectorAll("li, span, div").forEach((el) => {
+          const txt = el.textContent && el.textContent.trim();
+          if (txt && /^[@A-Za-z0-9._\s]{1,60}$/.test(txt)) {
+            // take the first token that matches username pattern
+            const token = txt
+              .split(/\s+/)
+              .find((t) => /^[A-Za-z0-9._]{1,30}$/.test(t));
+            if (token) push(token);
+          }
+        });
+
+        return Array.from(names);
+      }
+
+      // Main handler that compares two uploaded HTML files and shows accounts not following back
       async function checkUnfollowers() {
         const followingFile = document.getElementById("followingFile").files[0];
         const followersFile = document.getElementById("followersFile").files[0];
@@ -262,31 +390,38 @@
           return;
         }
 
-        const followingDoc = await readHTMLFile(followingFile);
-        const followersDoc = await readHTMLFile(followersFile);
+        const [followingDoc, followersDoc] = await Promise.all([
+          readHTMLFile(followingFile),
+          readHTMLFile(followersFile),
+        ]);
 
-        const followingUsernames = [...followingDoc.querySelectorAll("h2")].map(
-          (h2) => h2.textContent.trim()
+        const followingUsernames = extractUsernames(followingDoc).map((s) =>
+          s.toLowerCase()
         );
-        const followerUsernames = [
-          ...followersDoc.querySelectorAll("div._a6-p a"),
-        ].map((a) => a.textContent.trim());
+        const followerUsernames = extractUsernames(followersDoc).map((s) =>
+          s.toLowerCase()
+        );
 
-        const notFollowingBack = followingUsernames.filter(
-          (u) => !followerUsernames.includes(u)
-        );
+        // Use a set for faster lookup
+        const followerSet = new Set(followerUsernames);
+
+        const notFollowingBack = followingUsernames.filter((u) => !followerSet.has(u));
 
         if (notFollowingBack.length === 0) {
           resultDiv.innerHTML = "<p>🎉 Semua akun mengikuti kamu kembali!</p>";
           return;
         }
 
-        let html =
-          "<h2>🚫 Akun yang Tidak Mengikuti Balik</h2><table><tr><th>No</th><th>Username</th></tr>";
+        // build improved, responsive table
+        let html = `<h2>🚫 Akun yang Tidak Mengikuti Balik</h2>`;
+        html += `<div class="table-wrap"><table aria-describedby="unfoll-summary"><thead><tr><th>No</th><th>Username</th></tr></thead><tbody>`;
         notFollowingBack.forEach((u, i) => {
-          html += `<tr><td>${i + 1}</td><td>${u}</td></tr>`;
+          const safeUser = String(u).trim();
+          const profileUrl = `https://instagram.com/${encodeURIComponent(safeUser)}`;
+          html += `<tr><td>${i + 1}</td><td><a href="${profileUrl}" target="_blank" rel="noopener noreferrer">@${safeUser}</a></td></tr>`;
         });
-        html += "</table>";
+        html += `</tbody></table></div>`;
+        html += `<p id="unfoll-summary" style="color:var(--muted);margin-top:8px;">Total: ${notFollowingBack.length} akun</p>`;
 
         resultDiv.innerHTML = html;
       }
