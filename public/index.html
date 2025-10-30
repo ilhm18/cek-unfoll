@@ -29,8 +29,12 @@
         flex-direction: column;
         gap: 0; /* zero gap so items appear connected */
         margin-top: 8px;
-        background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-        border: 1px solid rgba(255,255,255,0.04);
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.02),
+          rgba(255, 255, 255, 0.01)
+        );
+        border: 1px solid rgba(255, 255, 255, 0.04);
         border-radius: 12px;
         overflow: hidden;
       }
@@ -40,10 +44,14 @@
         justify-content: space-between;
         padding: 14px 16px;
         background: transparent; /* let card-list provide background */
-        border-bottom: 1px solid rgba(255,255,255,0.03);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.03);
       }
-      .card-item:first-child{ border-top: none; }
-      .card-item:last-child{ border-bottom: none; }
+      .card-item:first-child {
+        border-top: none;
+      }
+      .card-item:last-child {
+        border-bottom: none;
+      }
       .card-item .no {
         min-width: 44px;
         text-align: center;
@@ -310,40 +318,54 @@
         pointer-events: auto;
       }
       .site-footer > .footer-inner {
-        /* make the footer span the full viewport width (edge-to-edge)
-           reduce height so it reads like a horizontal rectangle */
+        /* full-width thin horizontal footer */
         max-width: none;
         width: 100%;
         margin: 0;
         border-radius: 0;
-        /* subtle accent line */
-        border-top: 2px solid rgba(124,92,255,0.22);
+        /* subtle, thinner accent line */
+        border-top: 1px solid rgba(124, 92, 255, 0.18);
         background: #23232a;
         color: var(--muted);
-        /* keep content centered horizontally and vertically but keep footer short */
+        /* compact layout: even smaller padding and text */
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        padding: 8px 16px;
+        /* slightly lower height but restore readable text size */
+        padding: 3px 8px; /* slightly smaller vertical space */
+        font-size: 13px; /* restored */
+        line-height: 1.1;
         text-align: center;
         box-sizing: border-box;
       }
       /* keep the clickable IG link compact and centered */
-      .site-footer .ig-link{
-        display:inline-flex;
-        align-items:center;
-        gap:8px;
+      .site-footer .ig-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px !important; /* override inline gap if present */
         text-decoration: none;
       }
-      .site-footer .ig-link img{ /* ensure image sits nicely and is vertically centered */
-        height:28px;
-        width:28px;
-        vertical-align:middle;
+      .site-footer .ig-link img {
+        /* slightly larger icon for readability but still compact; override inline */
+        height: 16px !important;
+        width: 16px !important;
+        vertical-align: middle;
         margin: 0;
       }
-      .site-footer .ig-link-text{ color:var(--accent-2); font-weight:700 }
-      .site-footer .footer-inner p, .site-footer .footer-inner span{ margin-top:6px; color:var(--muted) }
+      .site-footer .ig-link-text {
+        color: var(--accent-2);
+        font-weight: 700;
+        font-size: 13px !important; /* restore readable size */
+      }
+      /* reduce spacing below the logo/link wrapper (overrides inline margin) */
+      .site-footer > .footer-inner > div { margin-bottom: 2px !important; }
+      .site-footer .footer-inner p,
+      .site-footer .footer-inner span {
+        margin-top: 2px !important;
+        color: var(--muted);
+        font-size: 12px !important; /* restore copyright size */
+      }
       .site-footer a {
         color: var(--accent-2);
         text-decoration: none;
@@ -377,42 +399,24 @@
     <footer class="site-footer" aria-label="Footer">
       <div
         class="w-full text-center py-6 footer-inner"
-        style="background: #23232a; font-weight: 600;"
-      
-      
+        style="background: #23232a; font-weight: 600"
       >
-        <div style="margin-bottom: 12px">
-          <a
-            href="https://instagram.com/ilhamm.18"
-            target="_blank"
-            rel="noopener noreferrer"
-            style="
-              display: inline-flex;
-              align-items: center;
-              gap: 8px;
-              text-decoration: none;
-              color: #7f5af0;
-              font-weight: 600;
-            "
-            class="ig-link"
-          >
-            <img
-              src="public/igeh.png"
-              alt="Instagram"
-              style="
-                height: 28px;
-                width: 28px;
-                vertical-align: middle;
-                filter: drop-shadow(0 2px 8px rgba(127, 90, 240, 0.18));
-              "
-            />
-            <span class="ig-link-text">Follow me on Instagram</span>
-          </a>
-        </div>
-        &copy; <span id="footer-year">2025</span> by ilham — All rights
-        reserved.
+        <div style="margin-bottom: 12px;">
+        <a href="https://instagram.com/ilhamm.18" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:#7f5af0;font-weight:600;" class="ig-link">
+          <img src="public/igeh.png" alt="Instagram" style="height:28px;width:28px;vertical-align:middle;filter:drop-shadow(0 2px 8px rgba(127,90,240,0.18));">
+          <span class="ig-link-text">Follow me on Instagram</span>
+        </a>
       </div>
-    </footer>
+      &copy; 2025 by ilham All rights reserved.
+      <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          var aboutSection = document.getElementById("about");
+          if (aboutSection) {
+            setTimeout(function () {
+              aboutSection.scrollIntoView({ behavior: "smooth" });
+            }, 400);
+          }
+        }); 
 
     <script>
       // Read HTML file and return parsed Document
