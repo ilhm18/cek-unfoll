@@ -318,7 +318,28 @@
         border-top: 2px solid rgba(124,92,255,0.22);
         background: #23232a;
         color: var(--muted);
+        /* center content and add space from top border */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding-top: 14px;
+        padding-bottom: 14px;
+        text-align: center;
       }
+      .site-footer .ig-link{
+        display:inline-flex;
+        align-items:center;
+        gap:8px;
+      }
+      .site-footer .ig-link img{ /* ensure image sits nicely and has spacing */
+        height:28px;
+        width:28px;
+        vertical-align:middle;
+        margin-bottom:2px;
+      }
+      .site-footer .ig-link-text{ color:var(--accent-2); font-weight:700 }
+      .site-footer .footer-inner p, .site-footer .footer-inner span{ margin-top:8px; color:var(--muted) }
       .site-footer a {
         color: var(--accent-2);
         text-decoration: none;
