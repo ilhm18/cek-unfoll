@@ -19,9 +19,41 @@
       /* Improved result table styling */
       .table-wrap {
         margin-top: 12px;
-        overflow-x: auto;
+        /* prevent horizontal sliding — we'll provide a mobile card view instead */
+        overflow: hidden;
         border-radius: 8px;
-        -webkit-overflow-scrolling: touch;
+      }
+      /* Mobile card list (used when viewport is narrow) */
+      .card-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 8px;
+      }
+      .card-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 14px;
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.01),
+          rgba(255, 255, 255, 0.005)
+        );
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.03);
+      }
+      .card-item .no {
+        min-width: 40px;
+        text-align: center;
+        color: var(--muted);
+        font-weight: 600;
+      }
+      .card-item .user {
+        flex: 1;
+        padding-left: 12px;
+        font-weight: 700;
+        word-break: break-word;
       }
       #result table {
         width: 100%;
@@ -405,22 +437,43 @@
         // Use a set for faster lookup
         const followerSet = new Set(followerUsernames);
 
-        const notFollowingBack = followingUsernames.filter((u) => !followerSet.has(u));
+        const notFollowingBack = followingUsernames.filter(
+          (u) => !followerSet.has(u)
+        );
 
         if (notFollowingBack.length === 0) {
           resultDiv.innerHTML = "<p>🎉 Semua akun mengikuti kamu kembali!</p>";
           return;
         }
 
-        // build improved, responsive table
+        // build improved result — use table on wide screens, stacked cards on narrow screens
+        const isNarrow = window.innerWidth <= 640;
         let html = `<h2>🚫 Akun yang Tidak Mengikuti Balik</h2>`;
-        html += `<div class="table-wrap"><table aria-describedby="unfoll-summary"><thead><tr><th>No</th><th>Username</th></tr></thead><tbody>`;
-        notFollowingBack.forEach((u, i) => {
-          const safeUser = String(u).trim();
-          const profileUrl = `https://instagram.com/${encodeURIComponent(safeUser)}`;
-          html += `<tr><td>${i + 1}</td><td><a href="${profileUrl}" target="_blank" rel="noopener noreferrer">@${safeUser}</a></td></tr>`;
-        });
-        html += `</tbody></table></div>`;
+        if (isNarrow) {
+          html += `<div class="card-list">`;
+          notFollowingBack.forEach((u, i) => {
+            const safeUser = String(u).trim();
+            const profileUrl = `https://instagram.com/${encodeURIComponent(
+              safeUser
+            )}`;
+            html += `<div class="card-item"><div class="no">${
+              i + 1
+            }</div><div class="user"><a href="${profileUrl}" target="_blank" rel="noopener noreferrer">@${safeUser}</a></div></div>`;
+          });
+          html += `</div>`;
+        } else {
+          html += `<div class="table-wrap"><table aria-describedby="unfoll-summary"><thead><tr><th style="width:64px">No</th><th>Username</th></tr></thead><tbody>`;
+          notFollowingBack.forEach((u, i) => {
+            const safeUser = String(u).trim();
+            const profileUrl = `https://instagram.com/${encodeURIComponent(
+              safeUser
+            )}`;
+            html += `<tr><td style="text-align:center">${
+              i + 1
+            }</td><td><a href="${profileUrl}" target="_blank" rel="noopener noreferrer">@${safeUser}</a></td></tr>`;
+          });
+          html += `</tbody></table></div>`;
+        }
         html += `<p id="unfoll-summary" style="color:var(--muted);margin-top:8px;">Total: ${notFollowingBack.length} akun</p>`;
 
         resultDiv.innerHTML = html;
