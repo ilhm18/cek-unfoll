@@ -23,28 +23,29 @@
         overflow: hidden;
         border-radius: 8px;
       }
-      /* Mobile card list (used when viewport is narrow) */
+      /* Mobile card list (used when viewport is narrow) - visually joined */
       .card-list {
         display: flex;
         flex-direction: column;
-        gap: 10px;
+        gap: 0; /* zero gap so items appear connected */
         margin-top: 8px;
+        background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+        border: 1px solid rgba(255,255,255,0.04);
+        border-radius: 12px;
+        overflow: hidden;
       }
       .card-item {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 12px 14px;
-        background: linear-gradient(
-          180deg,
-          rgba(255, 255, 255, 0.01),
-          rgba(255, 255, 255, 0.005)
-        );
-        border-radius: 10px;
-        border: 1px solid rgba(255, 255, 255, 0.03);
+        padding: 14px 16px;
+        background: transparent; /* let card-list provide background */
+        border-bottom: 1px solid rgba(255,255,255,0.03);
       }
+      .card-item:first-child{ border-top: none; }
+      .card-item:last-child{ border-bottom: none; }
       .card-item .no {
-        min-width: 40px;
+        min-width: 44px;
         text-align: center;
         color: var(--muted);
         font-weight: 600;
@@ -65,6 +66,36 @@
           transparent
         );
         color: var(--text);
+      }
+      /* Result card to visually separate the results from page background */
+      .result-card {
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.02),
+          rgba(255, 255, 255, 0.01)
+        );
+        border: 1px solid rgba(255, 255, 255, 0.04);
+        border-radius: 12px;
+        padding: 18px;
+        box-shadow: 0 10px 30px rgba(2, 6, 23, 0.55);
+        margin-top: 12px;
+      }
+      .result-card h2 {
+        margin: 0 0 12px 0;
+        font-size: 1.15rem;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      /* links in results */
+      .result-card a {
+        color: var(--accent-2);
+        text-decoration: none;
+      }
+      .result-card a:hover {
+        color: var(--accent);
+        text-decoration: underline;
       }
       #result thead th {
         text-align: left;
@@ -121,6 +152,7 @@
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         padding: 32px;
+        padding-bottom: 120px; /* ensure page content isn't hidden behind fixed footer */
         box-sizing: border-box;
       }
 
@@ -266,14 +298,26 @@
         }
       }
       /* Footer styles */
+      /* Make footer fixed and always visible while scrolling results */
       .site-footer {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        justify-content: center;
+        z-index: 9999;
+        pointer-events: auto;
+      }
+      .site-footer > .footer-inner {
         max-width: 820px;
-        margin: 18px auto 40px auto;
-        text-align: center;
+        width: 100%;
+        margin: 0 16px;
+        border-radius: 10px 10px 0 0;
+        /* match theme: subtle accent line instead of bright yellow */
+        border-top: 2px solid rgba(124,92,255,0.22);
+        background: #23232a;
         color: var(--muted);
-        font-size: 0.92rem;
-        padding-top: 12px;
-        border-top: 1px solid rgba(255, 255, 255, 0.03);
       }
       .site-footer a {
         color: var(--accent-2);
@@ -307,13 +351,10 @@
 
     <footer class="site-footer" aria-label="Footer">
       <div
-        class="w-full text-center py-6"
-        style="
-          background: #23232a;
-          color: #ffd166;
-          font-weight: 600;
-          border-top: 2px solid #ffd166;
-        "
+        class="w-full text-center py-6 footer-inner"
+        style="background: #23232a; font-weight: 600;"
+      
+      
       >
         <div style="margin-bottom: 12px">
           <a
@@ -448,34 +489,36 @@
 
         // build improved result — use table on wide screens, stacked cards on narrow screens
         const isNarrow = window.innerWidth <= 640;
-        let html = `<h2>🚫 Akun yang Tidak Mengikuti Balik</h2>`;
+        let inner = `<h2>🚫 Akun yang Tidak Mengikuti Balik</h2>`;
         if (isNarrow) {
-          html += `<div class="card-list">`;
+          inner += `<div class="card-list">`;
           notFollowingBack.forEach((u, i) => {
             const safeUser = String(u).trim();
             const profileUrl = `https://instagram.com/${encodeURIComponent(
               safeUser
             )}`;
-            html += `<div class="card-item"><div class="no">${
+            inner += `<div class="card-item"><div class="no">${
               i + 1
             }</div><div class="user"><a href="${profileUrl}" target="_blank" rel="noopener noreferrer">@${safeUser}</a></div></div>`;
           });
-          html += `</div>`;
+          inner += `</div>`;
         } else {
-          html += `<div class="table-wrap"><table aria-describedby="unfoll-summary"><thead><tr><th style="width:64px">No</th><th>Username</th></tr></thead><tbody>`;
+          inner += `<div class="table-wrap"><table aria-describedby="unfoll-summary"><thead><tr><th style="width:64px">No</th><th>Username</th></tr></thead><tbody>`;
           notFollowingBack.forEach((u, i) => {
             const safeUser = String(u).trim();
             const profileUrl = `https://instagram.com/${encodeURIComponent(
               safeUser
             )}`;
-            html += `<tr><td style="text-align:center">${
+            inner += `<tr><td style="text-align:center">${
               i + 1
             }</td><td><a href="${profileUrl}" target="_blank" rel="noopener noreferrer">@${safeUser}</a></td></tr>`;
           });
-          html += `</tbody></table></div>`;
+          inner += `</tbody></table></div>`;
         }
-        html += `<p id="unfoll-summary" style="color:var(--muted);margin-top:8px;">Total: ${notFollowingBack.length} akun</p>`;
+        inner += `<p id="unfoll-summary" style="color:var(--muted);margin-top:8px;">Total: ${notFollowingBack.length} akun</p>`;
 
+        // Wrap result into a card to separate from page background
+        const html = `<div class="result-card">${inner}</div>`;
         resultDiv.innerHTML = html;
       }
     </script>
