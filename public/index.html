@@ -19,9 +19,11 @@
       /* Improved result table styling */
       .table-wrap {
         margin-top: 12px;
-        /* prevent horizontal sliding — we'll provide a mobile card view instead */
-        overflow: hidden;
+        /* allow horizontal scroll when needed but keep visual blending */
+        overflow: auto;
         border-radius: 8px;
+        background: transparent;
+        border: none;
       }
       /* Mobile card list (used when viewport is narrow) - visually joined */
       .card-list {
@@ -29,21 +31,17 @@
         flex-direction: column;
         gap: 0; /* zero gap so items appear connected */
         margin-top: 8px;
-        background: linear-gradient(
-          180deg,
-          rgba(255, 255, 255, 0.02),
-          rgba(255, 255, 255, 0.01)
-        );
-        border: 1px solid rgba(255, 255, 255, 0.04);
-        border-radius: 12px;
+        background: transparent; /* let .result-card provide background */
+        border: none;
+        border-radius: 8px;
         overflow: hidden;
       }
       .card-item {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 14px 16px;
-        background: transparent; /* let card-list provide background */
+        padding: 12px 14px;
+        background: transparent; /* let .result-card provide background */
         border-bottom: 1px solid rgba(255, 255, 255, 0.03);
       }
       .card-item:first-child {
@@ -68,25 +66,24 @@
         width: 100%;
         border-collapse: separate;
         border-spacing: 0;
-        background: linear-gradient(
-          180deg,
-          rgba(255, 255, 255, 0.01),
-          transparent
-        );
+        background: transparent; /* blend with result card */
         color: var(--text);
       }
       /* Result card to visually separate the results from page background */
       .result-card {
+        /* softer, more integrated card */
         background: linear-gradient(
           180deg,
-          rgba(255, 255, 255, 0.02),
-          rgba(255, 255, 255, 0.01)
+          rgba(255, 255, 255, 0.015),
+          rgba(255, 255, 255, 0.006)
         );
-        border: 1px solid rgba(255, 255, 255, 0.04);
-        border-radius: 12px;
-        padding: 18px;
-        box-shadow: 0 10px 30px rgba(2, 6, 23, 0.55);
+        background-color: var(--card);
+        border: 1px solid rgba(124, 92, 255, 0.04);
+        border-radius: 10px;
+        padding: 14px;
+        box-shadow: 0 6px 18px rgba(2, 6, 23, 0.28);
         margin-top: 12px;
+        backdrop-filter: blur(4px) saturate(1.02);
       }
       .result-card h2 {
         margin: 0 0 12px 0;
@@ -110,8 +107,8 @@
         padding: 12px 16px;
         font-weight: 700;
         color: var(--muted);
-        background: rgba(255, 255, 255, 0.02);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        background: rgba(255, 255, 255, 0.01);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.02);
       }
       #result tbody td {
         padding: 12px 16px;
@@ -207,18 +204,25 @@
         border: 1px solid rgba(255, 255, 255, 0.03);
       }
 
+      /* file input: keep it compact and prevent it from stretching table columns
+         allow truncation of long filenames and ensure it fits the parent container */
       input[type="file"] {
-        display: block;
+        display: inline-block;
         width: 100%;
-        max-width: 360px;
+        max-width: 100%;
+        min-width: 0; /* allow shrinking inside flex or table cells */
         margin: 12px 0;
-        padding: 10px 12px;
+        padding: 8px 10px;
         background: rgba(255, 255, 255, 0.02);
         color: var(--text);
         border: 1px solid rgba(255, 255, 255, 0.06);
         border-radius: 8px;
         outline: none;
         cursor: pointer;
+        box-sizing: border-box;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       button {
@@ -245,6 +249,24 @@
         color: var(--text);
       }
 
+      /* helper: small instruction link under the main button */
+      .how-get {
+        margin-top: 8px;
+        font-size: 0.95rem;
+        color: var(--muted);
+        text-align: center;
+      }
+      .how-get a {
+        color: var(--accent-2);
+        font-weight: 700;
+        text-decoration: none;
+        margin-left: 6px;
+      }
+      .how-get a:hover {
+        text-decoration: underline;
+        color: var(--accent);
+      }
+
       table {
         width: 100%;
         border-collapse: collapse;
@@ -266,6 +288,11 @@
         padding: 12px 14px;
         text-align: left;
         border-bottom: 1px dashed rgba(255, 255, 255, 0.03);
+        /* prevent long inline elements (like file input UI or links) from widening the column */
+        overflow: hidden;
+        text-overflow: ellipsis;
+        min-width: 0; /* allow shrinking in flexible layouts */
+        word-break: break-word;
       }
 
       th {
@@ -359,7 +386,9 @@
         font-size: 13px !important; /* restore readable size */
       }
       /* reduce spacing below the logo/link wrapper (overrides inline margin) */
-      .site-footer > .footer-inner > div { margin-bottom: 2px !important; }
+      .site-footer > .footer-inner > div {
+        margin-bottom: 2px !important;
+      }
       .site-footer .footer-inner p,
       .site-footer .footer-inner span {
         margin-top: 2px !important;
@@ -381,7 +410,7 @@
   <body>
     <div class="container">
       <h1>🔍 CEK UNFOLLOWER INSTAGRAM</h1>
-
+      <p><center><strong>created by ilhamm</a></strong></center></p>
       <p>
         <strong>Langkah:</strong><br />
         1️⃣ Upload file <code>following.html</code><br />
@@ -393,6 +422,42 @@
       <input type="file" id="followersFile" accept=".html" />
       <button onclick="checkUnfollowers()">Cek Sekarang</button>
 
+      <p class="how-get">
+        <h1></h1>cara mendapatkan filenya, <a href="#" id="show-how-link"> klik disini</a>
+      <div
+        id="how-get-files"
+        style="
+          display: none;
+          margin-top: 8px;
+          color: var(--muted);
+          font-size: 0.95rem;
+          max-width: 720px;
+          margin-left: auto;
+          margin-right: auto;
+        "
+      >
+        <styl="padding-left: 18px; margin: 0">
+          <li>
+            Buka Aplikasi Instagram dan masuk ke profile anda.
+          </li>
+          <li>
+            Buka settings <strong>Pusat Akun</strong>, lalu cari Informasi dan izin anda &gt;
+            <em>Ekspor informasi Anda</em> (Buat ekspor) dan pilih profile anda
+          </li>
+          <li>
+           Ekspor ke perangkat anda kemudian atur Rentang tanggal (saran sepanjang waktu)
+          </li>
+          <li>Dan klik tombol "mulai ekspor"</li>
+          <li>Lalu tunggu hingga beberapa menit sampai notifikasi email dari instagram</li>
+          <li>Jika sudah ada notifikasi, kembali ke Halaman ekspor yang sebelumnya dan download file informasinya</li>
+          <li>Lalu cari file <code>following.html</code>dan <code>followers_1.html</code></li>
+          <li>
+            Upload kedua file tersebut di form di atas, lalu klik
+            <strong>Cek Sekarang</strong>.
+          </li>
+          <p>*Jika masih bingung Dm instagram @ilhamm.18</p>
+      </div>
+
       <div id="result"></div>
     </div>
 
@@ -400,9 +465,7 @@
       <div
         class="w-full text-center py-6 footer-inner"
         style="background: #23232a; font-weight: 600"
-      >
-        
-      </div>
+      ></div>
     </footer>
 
     <script>
@@ -536,6 +599,23 @@
         // Wrap result into a card to separate from page background
         const html = `<div class="result-card">${inner}</div>`;
         resultDiv.innerHTML = html;
+      }
+
+      // toggle helper instructions visibility
+      const showHowLink = document.getElementById("show-how-link");
+      if (showHowLink) {
+        showHowLink.addEventListener("click", function (e) {
+          e.preventDefault();
+          const box = document.getElementById("how-get-files");
+          if (!box) return;
+          if (box.style.display === "none" || box.style.display === "") {
+            box.style.display = "block";
+            showHowLink.textContent = " tutup";
+          } else {
+            box.style.display = "none";
+            showHowLink.textContent = " klik disini";
+          }
+        });
       }
     </script>
   </body>
